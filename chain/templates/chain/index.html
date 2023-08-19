@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>index</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.4"
+            integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
+            crossorigin="anonymous"></script>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        tr, td, th {
+            border: 1px solid black;
+        }
+    </style>
+
+</head>
+<body>
+<div class="container">
+    <table border="1">
+        <thead>
+        <th>Manufacture</th>
+        <th>Model</th>
+        <th>Price</th>
+        </thead>
+        <tbody>
+        {% for obj in objs %}
+            {% include 'chain/product.html' with product=obj %}
+        {% endfor %}
+
+        </tbody>
+    </table>
+    {% include 'chain/form.html' %}
+
+</div>
+<script>
+    function tomSelectInitilize() {
+        for (const select of document.querySelectorAll('.select.form-select')) {
+            if (select.classList.length === 2) {
+
+                if (select.id === "id_manufacture") {
+                    new TomSelect(`#${select.id}`, {
+                        create: true,
+                        onOptionAdd: function (opt) {
+                            console.log(opt)
+                        },
+                        sortField: {
+                            field: "text",
+                            direction: "asc"
+                        },
+                        load: function (query, callback) {
+
+                            var url = '{% url 'chain:search' %}?q=' + encodeURIComponent(query);
+                            fetch(url)
+                                .then(response => response.json())
+                                .then(json => {
+                                    callback(json.items);
+                                }).catch(() => {
+                                callback();
+                            });
+
+                        },
+                    })
+                } else {
+                    new TomSelect(`#${select.id}`, {
+                        create: true,
+                        onOptionAdd: function (opt) {
+                            console.log(opt)
+                        },
+                        sortField: {
+                            field: "text",
+                            direction: "asc"
+                        }
+                    })
+                }
+            }
+        }
+    }
+
+
+    window.addEventListener('DOMContentLoaded', function () {
+        tomSelectInitilize();
+    })
+
+
+</script>
+<script>
+    document.addEventListener('htmx:afterSettle', function () {
+        tomSelectInitilize();
+    })
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+</body>
+</html>

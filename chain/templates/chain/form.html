@@ -1,0 +1,4 @@
+{% load crispy_forms_tags %}
+<form hx-post="{% url 'chain:add' %}" hx-target="table tbody" hx-swap="afterend">
+    {% crispy form %}
+</form>
